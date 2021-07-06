@@ -1,2 +1,4 @@
-# API para controle de ponto de funcionários.
+# API para controle de ponto dos funcionários.
+
+
 

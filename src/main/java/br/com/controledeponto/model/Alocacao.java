@@ -9,6 +9,15 @@ public class Alocacao {
 	private String tempo;
 	private String nomeProjeto;
 
+	public Alocacao() {
+	}
+
+	public Alocacao(String dia, String tempo, String nomeProjeto) {
+		this.dia = dia;
+		this.tempo = tempo;
+		this.nomeProjeto = nomeProjeto;
+	}
+
 	public String getDia() {
 		return dia;
 	}

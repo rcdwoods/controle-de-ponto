@@ -13,6 +13,13 @@ public class Momento {
 	@NotNull
 	@NotBlank
 	private String dataHora;
+	
+	public Momento() {
+	}
+	
+	public Momento(String dataHora) {
+		this.dataHora = dataHora;
+	}
 
 	public String getDataHora() {
 		return dataHora;
