@@ -1,10 +1,11 @@
 package br.com.controledeponto.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals; 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -72,20 +73,56 @@ class MomentoServiceTest {
 	}
 
 	@Test
-	void deveLancarHorarioDeAlmocoNaoAtingidoException_QuandoForMenorQueUmaHora() {
+	void deveLancarHorarioDeAlmocoNaoAtingidoException_QuandoHorarioForMenorQueUmaHora() {
+		Momento momento = new Momento("2021-07-07T11:30:00");
+		List<Momento> momentosExistentes = List.of(new Momento("2021-07-07T10:00:00"),
+				new Momento("2021-07-07T11:00:00"), new Momento("2021-07-08T12:00:00"),
+				new Momento("2021-07-08T13:00:00"));
+
+		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
+
+		assertThrows(HorarioDeAlmocoNaoAtingidoException.class,
+				() -> this.momentoService.validaHorarioDeAlmoco(momento));
+	}
+
+	@Test
+	void naoDeveLancarHorarioDeAlmocoNaoAtingidoException_QuandoHorarioForMaiorOuIgualUmaHora() {
 		Momento momento = new Momento("2021-07-07T12:00:00");
 		List<Momento> momentosExistentes = List.of(new Momento("2021-07-07T10:00:00"),
 				new Momento("2021-07-07T11:00:00"), new Momento("2021-07-08T12:00:00"),
 				new Momento("2021-07-08T13:00:00"));
-		
+
 		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
-		
-		assertThrows(HorarioDeAlmocoNaoAtingidoException.class, () -> this.momentoService.validaHorarioDeAlmoco(momento));
+
+		this.momentoService.validaHorarioDeAlmoco(momento);
 	}
 
 	@Test
 	void deveLancarUmaOrdemDeInsercaoInvalidaException_QuandoHorarioForMenorDoQueHorariosRegistrados() {
 
+	}
+
+	@Test
+	void deveRetornarAQuantidadeDeHorasTrabalhadasNoDia_QuandoHouverQuatroHorarios() {
+		List<Momento> momentosExistentes = List.of(new Momento("2021-07-07T08:00:00"),
+				new Momento("2021-07-07T12:00:00"), new Momento("2021-07-07T13:00:00"),
+				new Momento("2021-07-07T17:00:00"));
+
+		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
+
+		LocalTime horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
+		assertEquals(LocalTime.of(8, 0, 0), horasTrabalhadasObtidas);
+	}
+	
+	@Test
+	void deveRetornarAQuantidadeDeHorasTrabalhadasNoDia_QuandoHouverDoisOuTresHorarios() {
+		List<Momento> momentosExistentes = List.of(new Momento("2021-07-07T08:00:00"),
+				new Momento("2021-07-07T12:00:00"), new Momento("2021-07-07T13:00:00"));
+
+		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
+		
+		LocalTime horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
+		assertEquals(LocalTime.of(4, 0, 0), horasTrabalhadasObtidas);
 	}
 
 }

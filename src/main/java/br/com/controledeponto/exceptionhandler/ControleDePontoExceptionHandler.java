@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import br.com.controledeponto.service.exception.DataExistenteException;
 import br.com.controledeponto.service.exception.DiaDaSemanaInvalidoException;
 import br.com.controledeponto.service.exception.EstouroNoLimiteDeHorariosException;
+import br.com.controledeponto.service.exception.HorarioAcimaDoTrabalhadoException;
 import br.com.controledeponto.service.exception.HorarioDeAlmocoNaoAtingidoException;
 import br.com.controledeponto.service.exception.OrdemDeInsercaoInvalidaException;
 
@@ -66,6 +67,13 @@ public class ControleDePontoExceptionHandler extends ResponseEntityExceptionHand
 			WebRequest request) {
 		return handleExceptionInternal(ex, new Erro("Não pode haver horários anteriores aos já registrados no dia"),
 				new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+	}
+
+	@ExceptionHandler({ HorarioAcimaDoTrabalhadoException.class })
+	public ResponseEntity<Object> handleHorarioAcimaDoTrabalhadoException(HorarioAcimaDoTrabalhadoException ex,
+			WebRequest request) {
+		return handleExceptionInternal(ex, new Erro("Não pode alocar tempo maior que o tempo trabalhado no dia"),
+				new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 
 	public static class Erro {
