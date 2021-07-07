@@ -11,7 +11,7 @@ public class Registro {
 		this.dia = dia;
 		this.horarios = horarios;
 	}
-
+	
 	public String getDia() {
 		return this.dia;
 	}

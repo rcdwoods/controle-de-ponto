@@ -25,8 +25,4 @@ public class Momento {
 		return dataHora;
 	}
 
-	public void setDataHora(String dataHora) {
-		this.dataHora = dataHora;
-	}
-
 }

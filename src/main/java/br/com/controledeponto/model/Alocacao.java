@@ -31,24 +31,12 @@ public class Alocacao {
 		return dia;
 	}
 
-	public void setDia(String dia) {
-		this.dia = dia;
-	}
-
 	public String getTempo() {
 		return tempo;
 	}
 
-	public void setTempo(String tempo) {
-		this.tempo = tempo;
-	}
-
 	public String getNomeProjeto() {
 		return nomeProjeto;
-	}
-
-	public void setNomeProjeto(String nomeProjeto) {
-		this.nomeProjeto = nomeProjeto;
 	}
 
 }

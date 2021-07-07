@@ -108,8 +108,8 @@ public class MomentoService {
 		}
 	}
 
-	// Recebe um momento como parâmetro
-	// e retorna uma lista de momentos registrados no mesmo dia.
+	// Recebe uma data no formato "yyyy-MM-dd" ou "yyyy-MM-dd..."
+	// e retorna uma lista de momentos registrados na data informada
 	public List<Momento> obterMomentosRegistradosNaData(String data) {
 		List<Momento> momentos = this.momentoRepository.findAll();
 		String dataDoMomento = data.substring(0, 10);
@@ -168,7 +168,7 @@ public class MomentoService {
 	}
 	
 	// Buscar horas trabalhadas no mês
-	public Duration getHorasTrabalhadasNoDiazinho(String mes) {
+	public Duration getHorasTrabalhadasNoMes(String mes) {
 		List<Momento> momentosRegistradosNoDia = this.obterMomentosRegistradosNaData(mes);
 
 		if (momentosRegistradosNoDia.size() >= 4) {
@@ -182,26 +182,16 @@ public class MomentoService {
 			Duration segundaDiferenca = Duration.between(terceiroPonto, quartoPonto);
 			
 			Duration horasTrabalhadasNoDia = primeiraDiferenca.plus(segundaDiferenca);
-			
-//			LocalTime primeiraDiferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
-//					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
-//			LocalTime segundaDiferencaEntreDatas = quartoPonto.minusHours(terceiroPonto.getHour())
-//					.minusMinutes(terceiroPonto.getMinute()).minusSeconds(terceiroPonto.getSecond());
-//			LocalTime horasTrabalhadasNoDia = primeiraDiferencaEntreDatas
-//					.plusHours(segundaDiferencaEntreDatas.getHour()).plusMinutes(segundaDiferencaEntreDatas.getMinute())
-//					.plusSeconds(segundaDiferencaEntreDatas.getSecond());
 
 			return horasTrabalhadasNoDia;
+		}else if (momentosRegistradosNoDia.size() == 2 || momentosRegistradosNoDia.size() == 3) {
+			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
+			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().substring(11, 19));
+
+			Duration diferencaEntreDatas = Duration.between(primeiroPonto, segundoPonto);
+
+			return diferencaEntreDatas;
 		}
-//		else if (momentosRegistradosNoDia.size() == 2 || momentosRegistradosNoDia.size() == 3) {
-//			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
-//			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().substring(11, 19));
-//
-//			LocalTime diferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
-//					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
-//
-//			return diferencaEntreDatas;
-//		}
 
 		return Duration.ZERO;
 	}

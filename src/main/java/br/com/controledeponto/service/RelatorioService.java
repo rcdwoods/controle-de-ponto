@@ -1,9 +1,7 @@
 package br.com.controledeponto.service;
 
 import java.time.Duration;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,7 @@ public class RelatorioService {
 		this.registroService.validaExistenciaDeRegistrosNoMes(mes);
 		
 		Relatorio relatorioGerado = new Relatorio();
+		
 		relatorioGerado.setMes(mes);
 		relatorioGerado.setRegistros(this.registroService.getRegistrosNaData(mes));
 		relatorioGerado.setAlocacoes(this.alocacaoService.getAlocacoesDoMes(mes));
@@ -49,7 +48,7 @@ public class RelatorioService {
 	public Duration getSomaDosHorariosTrabalhados(String mes) {
 		Duration horasTrabalhadasNoMes = Duration.ZERO;
 		for(Registro registro : this.registroService.getRegistrosNaData(mes)) {
-			horasTrabalhadasNoMes = horasTrabalhadasNoMes.plus(this.momentoService.getHorasTrabalhadasNoDiazinho(registro.getDia()));
+			horasTrabalhadasNoMes = horasTrabalhadasNoMes.plus(this.momentoService.getHorasTrabalhadasNoMes(registro.getDia()));
 		}
 		return horasTrabalhadasNoMes;
 	}
@@ -68,6 +67,9 @@ public class RelatorioService {
 		return Duration.ZERO;
 	}
 	
+	// Recebe como parâmetro uma data no formado yyyy-MM e,
+	// caso as horas ideais de trabalho (8 horas por dia) for maior do que as horas trabalhadas,
+	// retorna a diferença entre o horario ideal e o horário trabalhado.
 	public Duration getHorasDevidas(String mes) {
 		Duration horasIdeais = this.getHorarioIdealTrabalhado(mes);
 		Duration horasTrabalhadas = this.getSomaDosHorariosTrabalhados(mes);

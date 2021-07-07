@@ -23,9 +23,8 @@ public class RegistroService {
 		this.momentoService = momentoService;
 	}
 
-	// Recebe uma data como parâmetro
-	// e retorna um objeto Registro com base nos momentos registrados nesta mesma
-	// data.
+	// Recebe uma data no formato "yyyy-MM-dd" como parâmetro
+	// e retorna um objeto Registro com base nos momentos registrados nesta mesma data
 	public List<Registro> getRegistrosNaData(String data) {
 		List<Momento> momentos = this.momentoService.getMomentosRegistradosNoMes(data);
 		List<String> datasQueContemMomentos = new ArrayList<>();
