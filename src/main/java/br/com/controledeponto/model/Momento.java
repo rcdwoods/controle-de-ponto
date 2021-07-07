@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @Document
 public class Momento {
 
-	// Exemplo: "2018-08-22T08:00:00"
 	@NotNull
 	@NotBlank
 	private String dataHora;

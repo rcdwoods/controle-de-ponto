@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import br.com.controledeponto.model.Registro;
 import br.com.controledeponto.model.Relatorio;
-import br.com.controledeponto.service.RegistroService;
 import br.com.controledeponto.service.RelatorioService;
 
 @Controller

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -110,8 +111,8 @@ class MomentoServiceTest {
 
 		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
 
-		LocalTime horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
-		assertEquals(LocalTime.of(8, 0, 0), horasTrabalhadasObtidas);
+		Duration horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
+		assertEquals(Duration.ofHours(8), horasTrabalhadasObtidas);
 	}
 	
 	@Test
@@ -121,8 +122,8 @@ class MomentoServiceTest {
 
 		when(this.momentoRepository.findAll()).thenReturn(momentosExistentes);
 		
-		LocalTime horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
-		assertEquals(LocalTime.of(4, 0, 0), horasTrabalhadasObtidas);
+		Duration horasTrabalhadasObtidas = this.momentoService.getHorasTrabalhadasNaData("2021-07-07");
+		assertEquals(Duration.ofHours(4), horasTrabalhadasObtidas);
 	}
 
 }

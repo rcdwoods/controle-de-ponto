@@ -49,9 +49,9 @@ class AlocacaoServiceTest {
 
 		when(this.alocacaoRepository.findAll()).thenReturn(alocacoesRegistradas);
 
-		LocalTime quantidadeDeHorasAlocadasNaData = this.alocacaoService.getHorasAlocadasNaData("2020-07-25");
+		Duration quantidadeDeHorasAlocadasNaData = this.alocacaoService.getHorasAlocadasNaData("2020-07-25");
 
-		assertEquals(LocalTime.parse("PT08H00M00S", DateTimeFormatter.ofPattern("'PT'HH'H'mm'M'ss'S'")),
+		assertEquals(Duration.ofHours(8),
 				quantidadeDeHorasAlocadasNaData);
 	}
 
@@ -63,7 +63,7 @@ class AlocacaoServiceTest {
 		
 		when(this.alocacaoRepository.findAll()).thenReturn(alocacoesRegistradas);
 		
-		Duration horasTrabalhadasNoProjeto = this.alocacaoService.getHorasTrabalhadasEmUmProjeto("Projeto", "2020-07");
+		Duration horasTrabalhadasNoProjeto = this.alocacaoService.getHorasTrabalhadasEmUmProjetoNoMes("Projeto", "2020-07");
 		
 		assertEquals(Duration.ofHours(6), horasTrabalhadasNoProjeto);
 	}
