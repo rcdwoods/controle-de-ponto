@@ -9,5 +9,6 @@ import br.com.controledeponto.model.Momento;
 public interface MomentoRepository extends MongoRepository<Momento, String>{
 	
 	public boolean existsByDataHora(String dataHora);
+	public Optional<Momento> findByDataHora(String dataHora);
 
 }

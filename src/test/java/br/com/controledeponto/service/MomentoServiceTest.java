@@ -42,7 +42,7 @@ class MomentoServiceTest {
 
 		when(this.momentoRepository.existsByDataHora(momento.getDataHora())).thenReturn(true);
 
-		assertThrows(DataExistenteException.class, () -> this.momentoService.validaExistenciaDaDataHora(momento));
+		assertThrows(DataExistenteException.class, () -> this.momentoService.validaExistenciaDaDataHora(momento.getDataHora()));
 	}
 
 	@Test

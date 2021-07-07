@@ -62,6 +62,10 @@ public class Relatorio {
 	public void setRegistros(List<Registro> registros) {
 		this.registros = registros;
 	}
+	
+	public void adicionarRegistro(Registro registro) {
+		this.registros.add(registro);
+	}
 
 	public List<Alocacao> getAlocacoes() {
 		return alocacoes;

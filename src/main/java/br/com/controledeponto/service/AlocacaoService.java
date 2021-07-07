@@ -36,7 +36,7 @@ public class AlocacaoService {
 		LocalTime horasParaAlocacao = LocalTime.parse(alocacao.getTempo(), this.formatoDoHorario);
 		LocalTime horasAlocadasComHoraAdicionada = horasAlocadasNaData.plusHours(horasParaAlocacao.getHour())
 				.plusMinutes(horasParaAlocacao.getMinute()).plusSeconds(horasParaAlocacao.getSecond());
-		
+
 		if ((horasParaAlocacao.compareTo(horasTrabalhadas) == 1)
 				|| (horasAlocadasComHoraAdicionada.compareTo(horasTrabalhadas) == 1)) {
 			throw new HorarioAcimaDoTrabalhadoException();
@@ -64,7 +64,14 @@ public class AlocacaoService {
 		}
 
 		return horasAlocadasNaData;
+	}
 
+	public List<Alocacao> getAlocacoesDoMes(String mes) {
+		List<Alocacao> alocacoesRegistradas = this.alocacaoRepository.findAll();
+		List<Alocacao> alocacoesDoMes = alocacoesRegistradas.stream()
+				.filter(alocacao -> alocacao.getDia().substring(0, 7).equals(mes)).collect(Collectors.toList());
+		
+		return alocacoesDoMes;
 	}
 
 }

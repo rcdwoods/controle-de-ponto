@@ -2,11 +2,9 @@ package br.com.controledeponto.service;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +16,7 @@ import br.com.controledeponto.service.exception.DataExistenteException;
 import br.com.controledeponto.service.exception.DiaDaSemanaInvalidoException;
 import br.com.controledeponto.service.exception.EstouroNoLimiteDeHorariosException;
 import br.com.controledeponto.service.exception.HorarioDeAlmocoNaoAtingidoException;
+import br.com.controledeponto.service.exception.OrdemDeInsercaoInvalidaException;
 import br.com.controledeponto.validator.ValidacaoDeDatas;
 
 @Service
@@ -37,9 +36,10 @@ public class MomentoService {
 	// Faz a validação geral da inserção do momento.
 	public void validaMomento(Momento momento) {
 		this.validaFormatoDaDataHora(momento);
-		this.validaExistenciaDaDataHora(momento);
+		this.validaExistenciaDaDataHora(momento.getDataHora());
 		this.validaHorariosRegistradosNoDia(momento);
 		this.validaDiaDaSemana(momento);
+		this.validaOrdemDeInsercaoDosHorarios(momento);
 		if (this.obterMomentosRegistradosNaData(momento.getDataHora()).size() == 2) {
 			this.validaHorarioDeAlmoco(momento);
 		}
@@ -53,8 +53,8 @@ public class MomentoService {
 
 	// Verifica se a data e hora do momento informado já existe.
 	// Caso exista, lança uma DataExistenteException.
-	public void validaExistenciaDaDataHora(Momento momento) {
-		if (this.momentoRepository.existsByDataHora(momento.getDataHora())) {
+	public void validaExistenciaDaDataHora(String data) {
+		if (this.momentoRepository.existsByDataHora(data)) {
 			throw new DataExistenteException();
 		}
 	}
@@ -96,9 +96,16 @@ public class MomentoService {
 	// Verifica se a ordem de inserção dos horários está correta.
 	// Por exemplo, um funcionário não pode bater um ponto uma hora atrás do último
 	// ponto.
-	// Logo, deve seguir uma ordem númerica, como 12:00, 16:00, 17:00, 20:00.
+	// Logo, deve seguir uma ordem númerica válida, como 12:00, 16:00, 17:00, 20:00.
 	public void validaOrdemDeInsercaoDosHorarios(Momento momento) {
-
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		List<Momento> momentosRegistradosNoDia = this.obterMomentosRegistradosNaData(momento.getDataHora());
+		List<String> momentosComHorarioSuperiorAoInformado = momentosRegistradosNoDia.stream().map(Momento::getDataHora)
+				.filter(item -> LocalDateTime.parse(item, formatter).isAfter(LocalDateTime.parse(momento.getDataHora(), formatter)))
+				.collect(Collectors.toList());
+		if(momentosComHorarioSuperiorAoInformado.size() > 0) {
+			throw new OrdemDeInsercaoInvalidaException();
+		}
 	}
 
 	// Recebe um momento como parâmetro
@@ -113,7 +120,17 @@ public class MomentoService {
 		return momentosDoMesmoDia;
 	}
 
-	// Recebe um momento como parâmetro
+	public List<Momento> getMomentosRegistradosNoMes(String data) {
+		List<Momento> momentos = this.momentoRepository.findAll();
+		String dataDoMomento = data.substring(0, 7);
+
+		List<Momento> momentosDoMesmoMes = momentos.stream()
+				.filter(item -> item.getDataHora().substring(0, 7).equals(dataDoMomento)).collect(Collectors.toList());
+
+		return momentosDoMesmoMes;
+	}
+
+	// Recebe uma data como parâmetro
 	// e retorna a quantidade total de horas trabalhadas por um funcionário em
 	// determinada data.
 	// A quantidade de horas trabalhadas é calculada por meio da soma das diferenças
@@ -121,16 +138,12 @@ public class MomentoService {
 	public LocalTime getHorasTrabalhadasNaData(String data) {
 		List<Momento> momentosRegistradosNoDia = this.obterMomentosRegistradosNaData(data);
 
-		LocalTime primeiroPonto;
-		LocalTime segundoPonto;
-		LocalTime terceiroPonto;
-		LocalTime quartoPonto;
-
 		if (momentosRegistradosNoDia.size() == 4) {
-			primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
-			segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().subSequence(11, 19));
-			terceiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(2).getDataHora().subSequence(11, 19));
-			quartoPonto = LocalTime.parse(momentosRegistradosNoDia.get(3).getDataHora().subSequence(11, 19));
+			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
+			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().subSequence(11, 19));
+			LocalTime terceiroPonto = LocalTime
+					.parse(momentosRegistradosNoDia.get(2).getDataHora().subSequence(11, 19));
+			LocalTime quartoPonto = LocalTime.parse(momentosRegistradosNoDia.get(3).getDataHora().subSequence(11, 19));
 
 			LocalTime primeiraDiferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
 					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
@@ -142,8 +155,8 @@ public class MomentoService {
 
 			return horasTrabalhadasNoDia;
 		} else if (momentosRegistradosNoDia.size() == 2 || momentosRegistradosNoDia.size() == 3) {
-			primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
-			segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().substring(11, 19));
+			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
+			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().substring(11, 19));
 
 			LocalTime diferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
 					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
@@ -152,6 +165,45 @@ public class MomentoService {
 		}
 
 		return LocalTime.of(0, 0, 0);
+	}
+	
+	// Buscar horas trabalhadas no mês
+	public Duration getHorasTrabalhadasNoDiazinho(String mes) {
+		List<Momento> momentosRegistradosNoDia = this.obterMomentosRegistradosNaData(mes);
+
+		if (momentosRegistradosNoDia.size() >= 4) {
+			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
+			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().subSequence(11, 19));
+			LocalTime terceiroPonto = LocalTime
+					.parse(momentosRegistradosNoDia.get(2).getDataHora().subSequence(11, 19));
+			LocalTime quartoPonto = LocalTime.parse(momentosRegistradosNoDia.get(3).getDataHora().subSequence(11, 19));
+
+			Duration primeiraDiferenca = Duration.between(primeiroPonto, segundoPonto);
+			Duration segundaDiferenca = Duration.between(terceiroPonto, quartoPonto);
+			
+			Duration horasTrabalhadasNoDia = primeiraDiferenca.plus(segundaDiferenca);
+			
+//			LocalTime primeiraDiferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
+//					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
+//			LocalTime segundaDiferencaEntreDatas = quartoPonto.minusHours(terceiroPonto.getHour())
+//					.minusMinutes(terceiroPonto.getMinute()).minusSeconds(terceiroPonto.getSecond());
+//			LocalTime horasTrabalhadasNoDia = primeiraDiferencaEntreDatas
+//					.plusHours(segundaDiferencaEntreDatas.getHour()).plusMinutes(segundaDiferencaEntreDatas.getMinute())
+//					.plusSeconds(segundaDiferencaEntreDatas.getSecond());
+
+			return horasTrabalhadasNoDia;
+		}
+//		else if (momentosRegistradosNoDia.size() == 2 || momentosRegistradosNoDia.size() == 3) {
+//			LocalTime primeiroPonto = LocalTime.parse(momentosRegistradosNoDia.get(0).getDataHora().substring(11, 19));
+//			LocalTime segundoPonto = LocalTime.parse(momentosRegistradosNoDia.get(1).getDataHora().substring(11, 19));
+//
+//			LocalTime diferencaEntreDatas = segundoPonto.minusHours(primeiroPonto.getHour())
+//					.minusMinutes(primeiroPonto.getMinute()).minusSeconds(primeiroPonto.getSecond());
+//
+//			return diferencaEntreDatas;
+//		}
+
+		return Duration.ZERO;
 	}
 
 }
