@@ -94,7 +94,8 @@ public class AlocacaoService {
 		
 		List<AlocacaoDTO> alocacoesDoMesSemRepeticao = nomesAlocacoesDoMesSemRepeticao.stream()
 				.map(nomeDoProjeto -> new Alocacao("", this.getHorasTrabalhadasEmUmProjeto(nomeDoProjeto, mes).toString(), nomeDoProjeto))
-				.map(alocacao -> new AlocacaoDTO(alocacao)).collect(Collectors.toList());
+				.map(alocacao -> new AlocacaoDTO(alocacao))
+				.collect(Collectors.toList());
 
 		return alocacoesDoMesSemRepeticao;
 	}
